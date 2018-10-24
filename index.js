@@ -1,4 +1,4 @@
-const { ApolloSever, gql}= require('apollo-server')
+const { ApolloServer, gql}= require('apollo-server')
 
 const crypto = require('crypto')
 
@@ -12,18 +12,8 @@ const db = {
     messages: [
         {id: '1', userId: '1', body: 'Sup G how hang', createdAt: Date.now() },
         {id: '2', userId: '2', body: 'Good bro Good', createdAt: Date.now() },
-        {id: '3', userId: '1', body: 'Hang Low.. Hand low', createdAt: Date.now() },
+        {id: '3', userId: '1', body: 'Good Man, You?', createdAt: Date.now() },
     ]
-}
-
-class User {
-    constructor (user){
-        Object.assign(this, user)
-    }
-    
-    messages () {
-        return db.messages.filter(message => message.userId === this.id)
-    }
 }
     
 const typeDefs = gql`
@@ -56,11 +46,11 @@ const resolvers = {
 
     Query: {
         users: () => db.users,
-        user: (root, { id }) => db.users.find(user => user.id === args.id),
+        user: (root, { id }) => db.users.find(user => user.id === id),
         messages: () => db.messages,
     },
     Mutation: {
-        addUser: ({ email, name }) => {
+        addUser: (root, { email, name }) => {
             const user ={
                 id: crypto.randomBytes(10).toString('hex'),
                 name,
@@ -70,19 +60,15 @@ const resolvers = {
             
             return user
         }
+    },
+    User: {
+        messages: user => db.messages.filter(message => message.userId === user.id)
+        }
     }
 
-}
+const server = new ApolloServer({ typeDefs, mocks: true })
 
+server.listen().then(({ url }) => console.log(url))
 
-const app = express()
-
-app.listen(3001, () => console.log('Listening on 3001'))
-
-app.use('/graphql', graphqlHTTP({
-    schema,
-    rootValue,
-    graphiql: true
-}))
 
 
