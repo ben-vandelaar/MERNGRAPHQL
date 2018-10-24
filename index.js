@@ -1,6 +1,5 @@
-const express = require('express')
-const graphqlHTTP = require('express-graphql')
-const { buildSchema } = require('graphql')
+const { ApolloSever, gql}= require('apollo-server')
+
 const crypto = require('crypto')
 
 
@@ -27,7 +26,7 @@ class User {
     }
 }
     
-const schema = buildSchema(`
+const typeDefs = gql`
     type Query {
         users: [User!]!
         user(id: ID!): User
@@ -51,22 +50,28 @@ const schema = buildSchema(`
         body: String!
         createdAt: String
     }
-`)
+`
 
-const rootValue = {
-    users: () => db.users.map(user => new User(user)),
-    user: args => db.users.find(user => user.id === args.id),
-    messages: () => db.messages,
-    addUser: ({ email, name }) => {
-        const user ={
-            id: crypto.randomBytes(10).toString('hex'),
-            name,
-            email
+const resolvers = {
+
+    Query: {
+        users: () => db.users,
+        user: (root, { id }) => db.users.find(user => user.id === args.id),
+        messages: () => db.messages,
+    },
+    Mutation: {
+        addUser: ({ email, name }) => {
+            const user ={
+                id: crypto.randomBytes(10).toString('hex'),
+                name,
+                email
+            }
+            db.users.push(user)
+            
+            return user
         }
-        db.users.push(user)
-        
-        return user
     }
+
 }
 
 

@@ -7,8 +7,7 @@
     "start": "nodemon --watch"
   },
   "dependencies": {
-    "express": "^4.16.4",
-    "express-graphql": "^0.6.12",
+    "apollo-server": "^2.1.0",
     "graphql": "^14.0.2",
     "nodemon": "^1.18.4"
   }
